@@ -3,11 +3,7 @@
 import { useState } from "react";
 import Button from "./ui/button";
 
-interface TaskFormProps {
-  onTaskCreated: () => void;
-}
-
-export default function TaskForm({ onTaskCreated }: TaskFormProps) {
+export default function TaskForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +31,9 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
       // フォームをリセット
       setTitle("");
       setDescription("");
-      onTaskCreated();
+
+      // タスク一覧を更新するためにページをリフレッシュ
+      window.location.reload();
     } catch (err: any) {
       setError(err.message);
     } finally {

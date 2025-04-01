@@ -1,23 +1,14 @@
-"use client";
-
-import { useState } from "react";
 import TaskForm from "@/components/task-form";
 import TaskList from "@/components/task-list";
 
 export default function Home() {
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const handleTaskCreated = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
-
   return (
     <div className="bg-gray-50">
       <header className="py-4 bg-gray-100 flex justify-around px-4 w-auto">
-        <div className="text-purple-800 font-bold text-xl">
+        <div className="text-gray-500 font-bold text-xl hover:text-gray-400">
           <a href="/">ToDoアプリ</a>
         </div>
-        <button className="text-purple-800 hover:text-purple-600">
+        <button className="text-gray-500 hover:text-gray-400">
           ログアウト
         </button>
       </header>
@@ -25,8 +16,8 @@ export default function Home() {
       <div className="max-w-4xl mx-auto min-h-screen flex flex-col">
         <main className="flex-grow px-4 py-8">
           <div className="max-w-xl mx-auto">
-            <TaskForm onTaskCreated={handleTaskCreated} />
-            <TaskList key={refreshKey} />
+            <TaskForm />
+            <TaskList />
           </div>
         </main>
       </div>

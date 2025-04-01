@@ -28,6 +28,16 @@ export default function TaskList() {
     }
   };
 
+  // タスクが更新されたときのハンドラー
+  const handleTaskUpdated = () => {
+    fetchTasks();
+  };
+
+  // タスクが削除されたときのハンドラー
+  const handleTaskDeleted = () => {
+    fetchTasks();
+  };
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -55,8 +65,8 @@ export default function TaskList() {
         <TaskItem
           key={task.id}
           task={task}
-          onTaskUpdated={fetchTasks}
-          onTaskDeleted={fetchTasks}
+          onTaskUpdated={handleTaskUpdated}
+          onTaskDeleted={handleTaskDeleted}
         />
       ))}
     </div>
