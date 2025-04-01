@@ -20,3 +20,11 @@ export async function deleteTaskAction(id: string) {
   await deleteTask(id);
   revalidatePath("/");
 }
+
+export async function toggleTaskCompletionAction(
+  id: string,
+  completed: boolean
+) {
+  await updateTask(id, { completed });
+  revalidatePath("/");
+}

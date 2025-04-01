@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { Task } from "@prisma/client";
-import { deleteTaskAction, updateTaskAction } from "@/lib/actions";
+import {
+  deleteTaskAction,
+  updateTaskAction,
+  toggleTaskCompletionAction,
+} from "@/lib/actions";
 import Button from "./ui/button";
 
 interface TaskItemProps {
@@ -13,6 +17,7 @@ export default function TaskItem({ task }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
+  const [completed, setCompleted] = useState(task.completed);
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleString("ja-JP", {
@@ -24,10 +29,10 @@ export default function TaskItem({ task }: TaskItemProps) {
     });
   };
 
-  // const handleToggleComplete = async () => {
-  //   await updateTask({ completed: !completed });
-  //   setCompleted(!completed);
-  // };
+  const handleToggleComplete = async () => {
+    await toggleTaskCompletionAction(task.id, !completed);
+    setCompleted(!completed);
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,8 +96,29 @@ export default function TaskItem({ task }: TaskItemProps) {
       ) : (
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3">
+            <input
+              type="checkbox"
+              checked={completed}
+              onChange={handleToggleComplete}
+              className="mt-2 h-4 w-4 rounded border-gray-300 text-[#5299b5] focus:ring-[#5299b5]"
+            />
             <div>
-              <h3 className="text-lg font-medium">{task.title}</h3>
+              <h3
+                className={`text-lg font-medium ${
+                  completed ? "line-through text-gray-500" : ""
+                }`}
+              >
+                {task.title}
+              </h3>
+              {task.description && (
+                <p
+                  className={`text-sm text-gray-600 mt-1 ${
+                    completed ? "line-through text-gray-400" : ""
+                  }`}
+                >
+                  {task.description}
+                </p>
+              )}
               <p className="text-xs text-gray-500 mt-1">
                 {formatDate(task.createdAt)}
               </p>
