@@ -1,91 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
+import { createTaskAction } from "@/lib/actions";
 import Button from "./ui/button";
 
 export default function TaskForm() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title, description }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "タスクの作成に失敗しました");
-      }
-
-      // フォームをリセット
-      setTitle("");
-      setDescription("");
-
-      // タスク一覧を更新するためにページをリフレッシュ
-      window.location.reload();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  async function action(formData: FormData) {
+    await createTaskAction(formData);
+    formRef.current?.reset();
+  }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Todoアプリ</h2>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
+    <div className="bg-white p-6 rounded shadow-md max-w-xl mx-auto mb-8">
+      <h2 className="text-xl font-bold mb-6 text-center">Todoアプリ</h2>
+      <form ref={formRef} action={action} className="space-y-4">
+        <div>
           <label
             htmlFor="title"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             タイトルを入力
           </label>
           <input
             type="text"
             id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+            name="title"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded focus:outline-none"
             placeholder="例:Javaの学習"
             required
           />
         </div>
-        <div className="mb-6">
+        <div>
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             タスクの詳細を入力
           </label>
           <textarea
             id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+            name="description"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded focus:outline-none"
             rows={3}
             placeholder="例:Spring Bootでアプリ作成"
           />
         </div>
-        <Button
-          type="submit"
-          disabled={isSubmitting || !title}
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none disabled:opacity-50 transition-colors"
-        >
-          {isSubmitting ? "送信中..." : "タスクを追加"}
-        </Button>
+        <div className="flex justify-center mt-4">
+          <Button type="submit" className="w-auto min-w-[150px]">
+            タスクを追加
+          </Button>
+        </div>
       </form>
     </div>
   );

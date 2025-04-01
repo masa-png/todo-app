@@ -1,26 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Task, UpdateTaskInput } from "@/types/task";
+import { Task } from "@prisma/client";
+import { deleteTaskAction, updateTaskAction } from "@/lib/actions";
 import Button from "./ui/button";
 
 interface TaskItemProps {
   task: Task;
-  onTaskUpdated: () => void;
-  onTaskDeleted: () => void;
 }
 
-export default function TaskItem({
-  task,
-  onTaskUpdated,
-  onTaskDeleted,
-}: TaskItemProps) {
+export default function TaskItem({ task }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
-  const [completed, setCompleted] = useState(task.completed);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleString("ja-JP", {
@@ -32,72 +24,26 @@ export default function TaskItem({
     });
   };
 
-  const handleToggleComplete = async () => {
-    await updateTask({ completed: !completed });
-    setCompleted(!completed);
-  };
+  // const handleToggleComplete = async () => {
+  //   await updateTask({ completed: !completed });
+  //   setCompleted(!completed);
+  // };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateTask({ title, description });
+    await updateTaskAction(task.id, { title, description });
     setIsEditing(false);
-  };
-
-  const updateTask = async (data: UpdateTaskInput) => {
-    setIsSubmitting(true);
-    setError("");
-
-    try {
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const responseData = await response.json();
-        throw new Error(responseData.error || "タスクの更新に失敗しました");
-      }
-
-      onTaskUpdated();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   const handleDelete = async () => {
     if (!confirm("このタスクを削除してもよろしいですか？")) {
       return;
     }
-
-    setIsSubmitting(true);
-    setError("");
-
-    try {
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "タスクの削除に失敗しました");
-      }
-
-      onTaskDeleted();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await deleteTaskAction(task.id);
   };
 
   return (
     <div className="bg-white p-4 rounded shadow-md mb-4">
-      {error && <p className="text-red-500 mb-2">{error}</p>}
       {isEditing ? (
         <form onSubmit={handleUpdate}>
           <div className="mb-3">
@@ -132,9 +78,7 @@ export default function TaskItem({
             />
           </div>
           <div className="flex space-x-2">
-            <Button type="submit" disabled={isSubmitting || !title}>
-              保存
-            </Button>
+            <Button type="submit">保存</Button>
             <Button
               type="button"
               onClick={() => setIsEditing(false)}
@@ -161,14 +105,12 @@ export default function TaskItem({
             <button
               onClick={() => setIsEditing(true)}
               className="text-blue-500 hover:underline text-sm"
-              disabled={isSubmitting}
             >
               編集
             </button>
             <button
               onClick={handleDelete}
               className="text-red-500 hover:underline text-sm"
-              disabled={isSubmitting}
             >
               削除
             </button>
